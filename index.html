@@ -116,9 +116,9 @@ svg.fig text:not([fill]) { fill: var(--ink); }
   </div>
 
   <svg class="fig" id="fs1" viewBox="0 0 780 400" role="img" aria-label="Pile, modulus ratio and response"></svg>
-  <svg class="fig" id="fstrip" viewBox="0 0 780 132" role="img" aria-label="Equal drop in natural frequency, different displacement"></svg>
+  <svg class="fig" id="fstrip" viewBox="0 0 780 154" role="img" aria-label="Equal drop in natural frequency, different displacement and coupling ratio"></svg>
 
-  <p class="caption"><b>Interactive Fig. S1.</b> How the depth profile of a cyclic stiffness change moves the coupling ratio ρ and the rotation point z<sub>r</sub> of a monopile. Move β<sub>1</sub> to concentrate the softening near the surface (red) or at depth (blue), and press play to let the cycles run. The bottom strip shows that histories with the same 1.2% drop in natural frequency raise the mudline displacement by different amounts (cf. Fig. 15). Winkler models of Section 2 and Appendix B (semi-rigid pile: Π = 63, α = 1); marks refer to Table 1.</p>
+  <p class="caption"><b>Interactive Fig. S1.</b> How the depth profile of a cyclic stiffness change moves the coupling ratio ρ and the rotation point z<sub>r</sub> of a monopile. Move β<sub>1</sub> to concentrate the softening near the surface (red) or at depth (blue), and press play to let the cycles run. The bottom strip shows that histories with the same 1.2% drop in natural frequency change the mudline displacement and the coupling ratio by different amounts (cf. Fig. 15). Winkler models of Section 2 and Appendix B (semi-rigid pile: Π = 63, α = 1); marks refer to Table 1.</p>
 </div>
 <script>
 // Sec. 2 and App. B, x = z/L
@@ -581,26 +581,26 @@ function computeTower() {
 function towerAt(b1) {
   const x = (Math.max(-0.1, Math.min(0.1, b1)) + 0.1) / 0.01, i = Math.min(19, Math.floor(x)), t = x - i;
   const a = tower[i], c = tower[i + 1], f = k => a[k] + t * (c[k] - a[k]);
-  return { du: f('du'), dth: f('dth') };
+  return { du: f('du'), dth: f('dth'), drho: f('drho') };
 }
 
 function drawStrip() {
   const svg = $('fstrip');
   svg.innerHTML = '';
   const f1 = it('f') + sub('1'), back = s => `<tspan dy="-3">${s}</tspan>`;
-  text(svg, 0, 22, 'Equal drop in ' + f1 + back(', different displacement'), { 'font-size': 16, 'font-weight': 600 });
+  text(svg, 0, 22, 'Equal drop in ' + f1 + back(', different displacement and ') + it('ρ'), { 'font-size': 16, 'font-weight': 600 });
   text(svg, 0, 42, `Tower model of Appendix B.2 (Π = 63, ${it('n')} = 0.5, ${it('N')} = 10` + sup(4) + '<tspan dy="7">):</tspan>', { 'font-size': 16, fill: css('--ink-2') });
   text(svg, 0, 58, '<tspan text-decoration="overline">β</tspan> is solved so that ' + f1 + back(' drops by 1.2% for every β') + sub('1') + back('.'), { 'font-size': 16, fill: css('--ink-2') });
   if (!tower) { text(svg, 0, 90, 'computing…', { 'font-size': 16, fill: css('--ink-3') }); return; }
 
   const b1 = S.b1, cur = towerAt(b1), uni = towerAt(0), col = colour(b1);
-  [['mudline displacement', 'du', 92], ['mudline rotation', 'dth', 116]].forEach(([name, k, y]) => {
+  [['mudline displacement', 'du', 90], ['mudline rotation', 'dth', 114], ['coupling ratio', 'drho', 138]].forEach(([name, k, y]) => {
     text(svg, 0, y, name, { 'font-size': 16 });
     text(svg, 250, y, signed(100 * cur[k], 1) + '%', { 'font-size': 18, 'font-weight': 600, fill: col, 'text-anchor': 'end' });
     text(svg, 258, y, 'uniform ' + signed(100 * uni[k], 1) + '%', { 'font-size': 16, fill: css('--ink-3') });
   });
 
-  const bx = { x: 440, y: 10, w: 300, h: 100 };
+  const bx = { x: 440, y: 10, w: 300, h: 118 };
   const xs = v => bx.x + (v + 0.105) / 0.21 * bx.w, ys = v => bx.y + bx.h - v / 24 * bx.h;
   el('rect', { x: bx.x, y: bx.y, width: bx.w, height: bx.h, fill: 'none', stroke: css('--ink'), 'stroke-width': 0.8 }, svg);
   for (const v of [0, 10, 20]) {
@@ -615,13 +615,16 @@ function drawStrip() {
   text(svg, bx.x - 28, bx.y + bx.h / 2, '%', { 'font-size': 16, 'text-anchor': 'middle' });
   el('path', { d: path(tower.map((r, i) => [xs(B1[i]), ys(100 * r.du)])), fill: 'none', stroke: css('--ink'), 'stroke-width': 1.5 }, svg);
   el('path', { d: path(tower.map((r, i) => [xs(B1[i]), ys(100 * r.dth)])), fill: 'none', stroke: css('--ink'), 'stroke-width': 1.5, 'stroke-dasharray': '6 4' }, svg);
+  el('path', { d: path(tower.map((r, i) => [xs(B1[i]), ys(100 * r.drho)])), fill: 'none', stroke: css('--ink'), 'stroke-width': 1.5, 'stroke-dasharray': '1.5 3' }, svg);
   text(svg, xs(-0.035), ys(100 * tower[7].du) - 12, 'displacement', { 'font-size': 16, 'text-anchor': 'end' });
   text(svg, xs(0.1) - 4, ys(100 * tower[20].dth) - 6, 'rotation', { 'font-size': 16, 'text-anchor': 'end' });
+  text(svg, xs(0.1) - 4, ys(100 * tower[20].drho) - 6, it('ρ'), { 'font-size': 16, 'text-anchor': 'end' });
 
   const x = xs(Math.max(-0.1, Math.min(0.1, b1)));
   line(svg, x, bx.y, x, bx.y + bx.h, { stroke: col, 'stroke-width': 1, 'stroke-dasharray': '2 3' });
   el('path', { d: `M${x} ${ys(100 * cur.du) - 6} l6 10.5 l-12 0 z`, fill: col, stroke: css('--ink'), 'stroke-width': 0.6 }, svg);
   el('rect', { x: x - 5, y: ys(100 * cur.dth) - 5, width: 10, height: 10, fill: col, stroke: css('--ink'), 'stroke-width': 0.6 }, svg);
+  el('path', { d: `M${x} ${ys(100 * cur.drho) - 6} l6 6 l-6 6 l-6 -6 z`, fill: col, stroke: css('--ink'), 'stroke-width': 0.6 }, svg);
 }
 
 function render(rebuild) {
