@@ -1,4 +1,4 @@
-# Coupling Ratio Explorer — Interactive Fig. S1
+# Coupling Ratio Explorer: Interactive Fig. S1
 
 Interactive supplementary figure for:
 
